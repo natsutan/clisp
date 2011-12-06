@@ -1,0 +1,5 @@
+(in-package "CL-USER")
+(load-all-patches)
+(compile-file "arrow"   :load t)
+;(load (current-pathname "arrow" nil))
+(deliver 'draw-arrow-demo "draw-arrow-demo" 5 :interface :capi)
