@@ -21,12 +21,12 @@
   (* ρxy σx σy))
 
 ; 単位変換
-(defun m->cm (x) (/ x 100))
-(defun cm-mm (x) (/ x 10))
+(defun m->cm (x) (* 100 x ))
+(defun cm->mm (x) (* 10 x ))
 (defun m->mm (x )
   (cm->mm (m->cm x)))
-(defun mm->cm (x) (* x 10 ))
-(defun cm->m (x) (* x 100))
+(defun mm->cm (x) (/ x 10 ))
+(defun cm->m (x) (/ x 100))
 (defun mm->m (x)
   (cm->m (mm->cm x)))
 
