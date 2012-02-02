@@ -1,24 +1,61 @@
 (load "othello/othello_board.lsp")
 (load "othello/othello_charactor.lsp")
-
+(load "othello/othello_rule.lsp")
+(defconstant *img-dir* "othello/img/")
 (defvar *top*)
 (defvar *option-dialog*)
+(defvar *turn*)
+(defvar *othello-board*)
 (setf *char-1* 0)
 (setf *char-2* 1)
-(setf *othello-board* (make-board))
+
+
+(defun draw-face (pane file)
+  (let  ((img (gp:read-and-convert-external-image
+               pane
+               file)))
+    (gp:draw-image pane img 10 10)))
+
+(defun draw-turn-image (pane sym)
+  (if (eq sym *turn*)
+    (gp:draw-image pane
+                   (gp:read-and-convert-external-image pane "othello/char/hammy.png")
+                   15 150)
+    (gp:clear-rectangle pane 0 150 200 200)))
+
+  
+(defun number-filename (v)
+  (format nil "~A~A.gif" *img-dir* v))
+
+(defun draw-score-image (pane v sym)
+  (gp:draw-image pane
+                 (gp:read-and-convert-external-image pane (number-filename v))
+                 (if (eq sym 'high) 30 50)
+                 100))
+              
+(defun draw-score (pane sym)
+  (let ((score (count-score sym)))
+    (multiple-value-bind
+        (high-value low-value)
+        (truncate score 10)
+      (progn 
+        (draw-score-image pane high-value 'high)
+        (draw-score-image pane low-value 'low)))))
+
 
 
 (defun draw-char1 (pane x y width height)
-  (let  ((img (gp:read-and-convert-external-image
-               pane
-               (char-filename *char-1*))))
-    (gp:draw-image pane img 10 10)))
+  (draw-face pane (char-filename *char-1*))
+  (draw-score pane 'white)
+  (draw-turn-image pane 'white)
+  ) 
+
 
 (defun draw-char2 (pane x y width height)
-  (let  ((img (gp:read-and-convert-external-image
-               pane
-               (char-filename *char-2*))))
-    (gp:draw-image pane img 10 10)))
+  (draw-face pane (char-filename *char-2*))
+  (draw-score pane 'black)
+  (draw-turn-image pane 'black))
+
 
 
 ;;; Optin Dialog
@@ -97,16 +134,17 @@
           :visible-min-width (get-view-width)
           :display-callback 'draw-board
           :background :darkgreen
-          :input-model '(((:motion )
-                    mouse-move))
-          )
+          :input-model (list (list '(:motion ) 'mouse-move)
+                             (list '(:button-1 :press) 'mouse-click *othello-board*)
+                             (list '(:button-1 :release) 'mouse-release char1 char2)
+                             ))
 
    (char1 capi:output-pane
-         :visible-min-height 100
+         :visible-min-height 120
          :visible-min-width 100
          :display-callback 'draw-char1)
    (char2 capi:output-pane
-         :visible-min-height 100
+         :visible-min-height 120
          :visible-min-width 100
          :display-callback 'draw-char2)
    )
@@ -119,6 +157,7 @@
   )
 
 (defun othello ()
+  (init-game)
   (setf *top* (make-instance 'othello))
   (capi:display *top*))
    

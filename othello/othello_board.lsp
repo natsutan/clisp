@@ -118,7 +118,7 @@
                   :foreground :black
                   ))))
 
-(defun draw-disks (pane x y widht height)
+(defun draw-disks (pane xp yp widht height)
   (do ((x 0 (+ x 1))) ((>= x *board-size*))
     (do ((y 0 (+ y 1))) ((>= y *board-size*))
       (let ((sym (get-disk *othello-board* x y))
@@ -134,7 +134,9 @@
         ((eq sym 'white)
          (gp:draw-circle pane x y radius :filled t :foreground :white))
         (t 'None)))
-            
+
+(defun update-disks (pane)
+  (draw-disk pane 0 0 0 0))
                               
 
 (defun draw-board-functions ()
@@ -187,7 +189,7 @@
       (truncate ly *square-size*))))
 
 
-; convert grid numer to display position
+; convert grid number to display position
 ; return a grid square list  (x1 x2 y1 y2)
 (defun calc-square-from-grid (gx gy)
   (let ((x1 (nth-x-position gx))
@@ -227,7 +229,17 @@
                          :filled t
                          ))))
  
-  
+; count score
+(defun count-score (sym)
+  (let ((cnt 0))
+    (do ((x 0 (+ x 1))) ((>= x *board-size*))
+      (do ((y 0 (+ y 1))) ((>= y *board-size*))
+        (let ((disk (get-disk *othello-board* x y)))
+          (if (eq sym disk)
+            (incf cnt)))))
+    cnt))
+
+
 ; Callback function
 (defun mouse-move (pane x y)
   (let ((pos (calc-grid x y)))
@@ -242,6 +254,33 @@
       (restore-grid pane))))
 
 
+(defun mouse-click (pane x y bd)
+  (let ((pos (calc-grid x y)))
+    (let ((gx (first pos)) (gy (second pos)))
+      (let ((disk (get-disk *othello-board* gx gy)))
+        (if (eq disk 'empty)
+          (progn
+            (set-disk bd gx gy *turn*)
+            (change-turn)
+        ))))))
+
+
+(defun mouse-release (pane x y char1 char2)
+  (gp:invalidate-rectangle pane)
+  (gp:invalidate-rectangle char1)
+  (gp:invalidate-rectangle char2)
+  )
+
+
+; move
+; pass
+; init
+; gameoverp
+; undo
+; current-color
+; movable-positon
+; turns
+; update
 
 
         

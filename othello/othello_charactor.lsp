@@ -19,12 +19,14 @@
                                     ("ポプリ" "popuri.jpg" ())
                                     ("コフレ" "kohure.jpg" ())
                                     ("シフレ" "shipre.jpg" ())
-                                    ("コロン" "koron.jog" ())
+                                    ("コロン" "koron.jpg" ())
                                     ("ダークプリキュア" "dark.jpg" ())
                                     ("コブラージャ" "kobura.jpg" ())
                                     ("クモジャンキー" "kumo.jpg" ())
                                     ("サバーク博士" "sabaku.jpg" ())
-                                    ("スナッキー" "sunakki.jpg" ()))))
+                                    ("スナッキー" "sunakki.jpg" ())
+                                    ("長門" "yuki.jpg" ())
+					)))
 
 
 (defun char-filename (n)
