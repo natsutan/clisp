@@ -201,11 +201,11 @@
             
 
 (defun lighten (pane gx gy)
-  (if (not (equal *hilited* (list gx gy)))
-    (progn
-      (restore-grid pane)
-      (lighten-grid pane gx gy)
-      (setf *hilited* (list gx gy)))))
+  (progn 
+    (if (not (equal *hilited* (list gx gy)))
+      (restore-grid pane))
+    (lighten-grid pane gx gy)
+    (setf *hilited* (list gx gy))))
 
 (defun lighten-grid (pane gx gy)
   (fill-grid pane gx gy :yellowgreen))
@@ -215,6 +215,7 @@
     (progn
       (fill-grid pane (first *hilited*)  (second *hilited*) :darkgreen)
       (setf *hilited* nil)
+      (gp:invalidate-rectangle pane)
       )))
 
 
@@ -229,29 +230,16 @@
                          :filled t
                          ))))
  
-; count score
-(defun count-score (sym)
-  (let ((cnt 0))
-    (do ((x 0 (+ x 1))) ((>= x *board-size*))
-      (do ((y 0 (+ y 1))) ((>= y *board-size*))
-        (let ((disk (get-disk *othello-board* x y)))
-          (if (eq sym disk)
-            (incf cnt)))))
-    cnt))
 
 
 ; Callback function
 (defun mouse-move (pane x y)
   (let ((pos (calc-grid x y)))
     (if pos
-      (let ((disk (get-disk *othello-board* (first pos) (second pos)))
-            (gx (first pos))
-            (gy (second pos)))
-        (if (eq disk 'empty)
+      (let ((gx (first pos)) (gy (second pos)))
+        (if (movable-positoinp-p *othello-board* gx gy)
           (lighten pane gx gy)
-          (restore-grid pane)
-          ))
-      (restore-grid pane))))
+        (restore-grid pane))))))
 
 
 (defun mouse-click (pane x y bd)
@@ -259,10 +247,8 @@
     (let ((gx (first pos)) (gy (second pos)))
       (let ((disk (get-disk *othello-board* gx gy)))
         (if (eq disk 'empty)
-          (progn
-            (set-disk bd gx gy *turn*)
-            (change-turn)
-        ))))))
+          (move bd gx gy *turn*)
+        )))))
 
 
 (defun mouse-release (pane x y char1 char2)
@@ -272,15 +258,7 @@
   )
 
 
-; move
-; pass
-; init
-; gameoverp
-; undo
-; current-color
-; movable-positon
-; turns
-; update
+
 
 
         
