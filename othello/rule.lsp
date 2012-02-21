@@ -1,7 +1,14 @@
-(defconstant *dir-table* '((0 1) (1 1) (1 0) (1 -1) 
-			(0 -1) (-1 -1) (-1 0) (-1 1)))
-          
+(defconstant *dir-table* 
+  '((N . (0 -1))
+    (NE . (-1 -1))
+    (W . (-1 0))
+    (SE . (-1 1))
+    (S . (0 1))
+    (SW .(1 1))
+    (W . (1 0))
+    (NW . (1 -1))))
 
+; assoc          
 (defun init-game ()
   (setf *othello-board* (make-board))
   (init-history)
@@ -29,8 +36,15 @@
 
 
 (defun move (bd x y sym)
-  (set-disk bd x y *turn*)
-  (change-turn))
+  (let ((movable-list (movable-positoinp-p bd x y)))
+    (dolist (tlist movable-list)
+      (dolist (turn tlist)
+        (turn-disk bd (car turn) (cdr turn))))
+    (set-disk bd x y *turn*)
+    (change-turn)
+    (when (equal (count-score 'empty) 0)
+      (show-result 0 0)
+      )))
 
 ; count score
 (defun count-score (sym)
@@ -52,30 +66,57 @@
   (change-turn))
 
 
-
-
 (defun turnlist (bd x y)
-  (< x 3))
-    
-;  (let ((tl '()))
-;    (dolist (dir *dir-table*)
-;      (let ((tb (turnable-disks bd x y dir)))
-;        (when tb
-;          (setf tl (setf tl (append tl (list tb)))))))
-;    tl
-;    ))
-          
+  (let ((tl '()))
+    (dolist (dir *dir-table*)
+      (let ((tb (turnable-disks bd x y (cdr dir))))
+        (when tb
+          (if tl
+            (setf tl (append tl (list tb)))
+            (setf tl (list tb))))))
+    tl
+    ))
+
+(defun get-reverse-disk (sym)
+  (case sym
+    ('white 'black)
+    ('black 'white)
+    (t nil)))
+
+
 (defun turnable-disks (bd x y dir)
-  (if (< x 3)
-    '(1 2)
-    NIL))
+  (let ((target (get-disk bd x y)))
+    (if (not (eql target 'empty))
+      '()
+      (let ((sym *turn*) (result '())  (next-x (+ x (first dir))) (next-y (+ y (second dir))))
+        (if (out-of-board-p next-x next-y)
+          '()
+          (let ((rev (get-reverse-disk *turn*)) (next-disk (get-disk bd next-x next-y)))
+            (if (not (equal rev next-disk))
+              '()
+              (search-sequance-disks bd next-x next-y *turn* dir))))))))
 
+(defun search-sequance-disks (bd x y sym dir)
+  (let ((next-x (+ x (first dir))) (next-y (+ y (second dir))) (rev (get-reverse-disk sym)))
+    (if (out-of-board-p next-x next-y)  ; 
+      '()
+      (let ((next-disk (get-disk bd next-x next-y)))
+        (cond
+         ((eql next-disk 'empty) '())
+         ((eql next-disk sym) (list (cons x y)))  
+         (t     ; (eq next-disk rev) continue search
+          (let ((r (search-sequance-disks bd next-x next-y sym dir)))
+            (cond 
+             ((eql r '()) '())
+             (t
+              (cons (cons x y) r))))))))))
 
+      
 (defun movable-positoinp-p (bd x y)
   (if (out-of-board-p x y)
     nil
     (let ((sym (get-disk bd x y)))
-      (if (eq sym 'empty)
+      (if (equal sym 'empty)
           (turnlist bd x y)
         nil))))
 
@@ -85,6 +126,13 @@
             (<  x  *board-size*)
             (>= y 0)
             (<  y *board-size*))))
+
+; (trace turnable-disks)
+; (trace search-sequance-disks)
+;  (setf ndir '(0 1)) 
+; (turnable-disks *othello-board* 4 1 ndir)
+; (4 5) (5 5)             
+  
 
 ; move
 

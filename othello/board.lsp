@@ -163,6 +163,13 @@
     (set-disk bd 4 4 'white)
     (set-disk bd 3 4 'black)
     (set-disk bd 4 3 'black)
+
+;    (set-disk bd 3 4 'white)
+;    (set-disk bd 3 5 'white)
+;    (set-disk bd 4 4 'black)
+;    (set-disk bd 4 5 'black)
+    
+    
     bd))
 
 
@@ -242,13 +249,15 @@
         (restore-grid pane))))))
 
 
-(defun mouse-click (pane x y bd)
-  (let ((pos (calc-grid x y)))
-    (let ((gx (first pos)) (gy (second pos)))
-      (let ((disk (get-disk *othello-board* gx gy)))
-        (if (eq disk 'empty)
-          (move bd gx gy *turn*)
-        )))))
+(defun mouse-click (pane x y)
+  (let ((pos (calc-grid x y)) (bd *othello-board*))
+    (if (eq pos nil)
+      nil
+      (let ((gx (first pos)) (gy (second pos)))
+        (let ((disk (get-disk bd gx gy)))
+          (if (and (eq disk 'empty) (movable-positoinp-p bd gx gy))
+            (move bd gx gy *turn*)
+          ))))))
 
 
 (defun mouse-release (pane x y char1 char2)
@@ -256,6 +265,8 @@
   (gp:invalidate-rectangle char1)
   (gp:invalidate-rectangle char2)
   )
+
+
 
 
 

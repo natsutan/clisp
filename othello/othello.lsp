@@ -111,13 +111,42 @@
                               )
                 :title "option"
                 )))))
-  
+
+
+
+;;; Result
+(defun show-result (data interface)
+  (capi:contain
+   (make-instance 
+    'capi:output-pane
+    :visible-min-height 100
+    :visible-min-width 100
+    :background :white
+    :display-callback 'draw-result)
+    )
+   )
+
+(defun draw-result (pane x y width height)
+  (let ((string-font (gp:find-best-font
+                      pane
+                      (gp:make-font-description 
+                       :size 32
+                       )))
+        (white (count-score 'white)) (black (count-score 'black)))
+    (if (equal white black)
+      (gp:draw-string pane *draw_msg* 70 100 :font string-font)
+      (progn
+        (gp:draw-string pane *win_msg* 100 100 :font string-font)
+        (if (> white black)
+          (draw-face pane (char-filename *char-1*))
+          (draw-face pane (char-filename *char-2*)))))))
+
+
 
 ;;; Draw Board
 (defun draw-board (pane x y width height)
   (dolist (draw-function (draw-board-functions))
     (funcall draw-function pane x y width height)))
-
 
 (capi:define-interface othello ()
   ()
@@ -136,7 +165,7 @@
           :display-callback 'draw-board
           :background :darkgreen
           :input-model (list (list '(:motion ) 'mouse-move)
-                             (list '(:button-1 :press) 'mouse-click *othello-board*)
+                             (list '(:button-1 :press) 'mouse-click)
                              (list '(:button-1 :release) 'mouse-release char1 char2)
                              ))
 
@@ -148,10 +177,38 @@
          :visible-min-height 120
          :visible-min-width 100
          :display-callback 'draw-char2)
+   (bstart capi:push-button
+           :data *start_msg*
+           :visible-min-width 80
+           :callback #'(lambda (data interface)
+                           (init-game)
+                           (gp:invalidate-rectangle board)
+                           (gp:invalidate-rectangle char1)
+                           (gp:invalidate-rectangle char2)
+                           )
+           )
+   (bpass capi:push-button
+           :data *pass_msg*
+           :visible-min-width 80
+           :callback #'(lambda  (data interface)
+                         (pass)
+                         (gp:invalidate-rectangle char1)
+                         (gp:invalidate-rectangle char2)
+                         )
+           )
+   
+   (bend capi:push-button
+           :data *end_msg*
+           :visible-min-width 80
+           :callback #'show-result
+           )
+
    )
   (:layouts
-   (all capi:row-layout '(board row-of-char))
+   (all capi:row-layout '(buttons-and-board row-of-char))
+   (buttons-and-board capi:column-layout '(buttons board))
    (row-of-char capi:column-layout '(char1 char2))
+   (buttons capi:row-layout '(bstart bpass bend))
    )
 
   (:default-initargs :title "othello")

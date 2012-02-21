@@ -1,3 +1,4 @@
+;キャラクターの情報と、日本語関連
 
 (defconstant *char-dir* "othello/char/")
 
@@ -14,6 +15,11 @@
 (setf *char-list* (mapcar #'mk-char '(
                                     ("つぼみ" "tubomi.jpg" ())
                                     ("えりか" "erika.jpg"  ())
+				    ("キュアハッピー" "happy.jpg" ())
+				    ("キュアサニー" "sunny.jpg" ())
+				    ("キュアピース" "peace.jpg" ())
+				    ("キュアマーチ" "march.jpg" ())
+    				    ("キュアビューティ" "beauty.jpg" ())
                                     ("いつき" "ituki.jpg"  ())
                                     ("ゆり" "yuri.jpg" ())
                                     ("ポプリ" "popuri.jpg" ())
@@ -33,5 +39,11 @@
   (let ((ch (nth n *char-list*)))
     (format nil "~A~A" *char-dir* (charactor-file ch))))
 
+; 日本語
+(defconstant *pass_msg* "パス")
+(defconstant *start_msg* "はじめ")
+(defconstant *end_msg* "おしまい")
 
+(defconstant *win_msg* "のかち")
+(defconstant *draw_msg* "ひきわけ")
 
